@@ -1,8 +1,8 @@
 import { createPool, sql } from '@vercel/postgres'
 import { POSTGRES_URL } from '$env/static/private'
 
-async function seed() {
-  const createTable = await sql`
+async function seed(pool) {
+  const createTable = await pool.sql`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       name VARCHAR(255) NOT NULL,
@@ -15,17 +15,17 @@ async function seed() {
   console.log(`Created "users" table`)
 
   const users = await Promise.all([
-    sql`
+    pool.sql`
           INSERT INTO users (name, email, image)
           VALUES ('Guillermo Rauch', 'rauchg@vercel.com', 'https://images.ctfassets.net/e5382hct74si/2P1iOve0LZJRZWUzfXpi9r/9d4d27765764fb1ad7379d7cbe5f1043/ucxb4lHy_400x400.jpg')
           ON CONFLICT (email) DO NOTHING;
       `,
-    sql`
+    pool.sql`
           INSERT INTO users (name, email, image)
           VALUES ('Lee Robinson', 'lee@vercel.com', 'https://images.ctfassets.net/e5382hct74si/4BtM41PDNrx4z1ml643tdc/7aa88bdde8b5b7809174ea5b764c80fa/adWRdqQ6_400x400.jpg')
           ON CONFLICT (email) DO NOTHING;
       `,
-    sql`
+    pool.sql`
           INSERT INTO users (name, email, image)
           VALUES ('Steven Tey', 'stey@vercel.com', 'https://images.ctfassets.net/e5382hct74si/4QEuVLNyZUg5X6X4cW4pVH/eb7cd219e21b29ae976277871cd5ca4b/profile.jpg')
           ON CONFLICT (email) DO NOTHING;
@@ -40,6 +40,7 @@ async function seed() {
 }
 
 export async function load() {
+  console.log('CS: %s', POSTGRES_URL);
   const db = createPool({ connectionString: POSTGRES_URL })
   const startTime = Date.now()
 
@@ -56,7 +57,7 @@ export async function load() {
         'Table does not exist, creating and seeding it with dummy data now...'
       )
       // Table is not created yet
-      await seed()
+      await seed(db)
       const { rows: users } = await db.query('SELECT * FROM users')
       const duration = Date.now() - startTime
       return {
