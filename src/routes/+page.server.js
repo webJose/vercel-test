@@ -1,5 +1,6 @@
 import { createPool, sql } from '@vercel/postgres'
-import { POSTGRES_URL } from '$env/static/private'
+// import { POSTGRES_URL } from '$env/static/private'
+import config from '../config.js'
 
 async function seed(pool) {
   const createTable = await pool.sql`
@@ -40,8 +41,8 @@ async function seed(pool) {
 }
 
 export async function load() {
-  console.log('CS: %s', POSTGRES_URL);
-  const db = createPool({ connectionString: POSTGRES_URL })
+  console.log('CS: %s', config.dbUrl);
+  const db = createPool({ connectionString: config.dbUrl })
   const startTime = Date.now()
 
   try {
