@@ -39,7 +39,7 @@ async function seed(pool) {
     users,
   }
 }
-
+ 
 export async function load() {
   console.log('CS: %s', config.dbUrl);
   const db = createPool({ connectionString: config.dbUrl })
